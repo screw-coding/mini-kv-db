@@ -40,7 +40,7 @@ func NewEntry(key, value []byte, mark uint16) *Entry {
 
 //
 // GetSize
-// @Description: 获取一个entry实际需要的磁盘空间
+// @Description: 获取一个entry实际需要的磁盘空间字节数
 // @receiver e
 // @return int64
 //
@@ -48,6 +48,13 @@ func (e *Entry) GetSize() int64 {
 	return int64(entryHeaderSize + e.KeySize + e.ValueSize)
 }
 
+//
+// Encode
+// @Description: 将Entry序列化为字节集
+// @receiver e
+// @return []byte
+// @return error
+//
 func (e *Entry) Encode() ([]byte, error) {
 	// 申请一块内存
 	buf := make([]byte, e.GetSize())
@@ -62,6 +69,13 @@ func (e *Entry) Encode() ([]byte, error) {
 	return buf, nil
 }
 
+//
+// Decode
+// @Description: 将字节数据解析为Entry
+// @param buf
+// @return *Entry
+// @return error
+//
 func Decode(buf []byte) (*Entry, error) {
 	keySize := binary.BigEndian.Uint32(buf[0:4])
 	valueSize := binary.BigEndian.Uint32(buf[4:8])

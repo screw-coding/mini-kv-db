@@ -20,7 +20,7 @@ type MiniKVDB struct {
 
 //
 // Open
-// @Description: Open a MiniKVDB instance
+// @Description: Open a MiniKVDB instance,打开一个数据库实例
 // @param dirPath
 // @return *MiniKVDB
 // @return error
@@ -75,7 +75,7 @@ func (db *MiniKVDB) Merge() error {
 			}
 			return err
 		}
-		//?
+		//读取一个索引,看是否有效
 		if off, ok := db.indexes[string(e.Key)]; ok && off == offset {
 			validEntries = append(validEntries, e)
 		}
@@ -115,6 +115,14 @@ func (db *MiniKVDB) Merge() error {
 	return nil
 }
 
+//
+// Set
+// @Description: 设置数据,类似Redis的set方法
+// @receiver db
+// @param key
+// @param value
+// @return err
+//
 func (db *MiniKVDB) Set(key []byte, value []byte) (err error) {
 	if len(key) == 0 {
 		return
@@ -124,17 +132,25 @@ func (db *MiniKVDB) Set(key []byte, value []byte) (err error) {
 	offset := db.dbFile.Offset
 	//封装成entry
 	entry := NewEntry(key, value, SET)
-
+	//写入数据文件
 	err = db.dbFile.Write(entry)
 	if err != nil {
 		return err
 	}
-
+	//写入内存索引
 	db.indexes[string(key)] = offset
 	return
 
 }
 
+//
+// Get
+// @Description: 获取数据,类似Redis的get方法
+// @receiver db
+// @param key
+// @return val
+// @return err
+//
 func (db *MiniKVDB) Get(key []byte) (val []byte, err error) {
 	if len(key) == 0 {
 		return
